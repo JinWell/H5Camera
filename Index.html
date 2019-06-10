@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>人脸认证DEMO</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/plugIn/jquery-3.4.1.min.js"></script>
+    <script src="/plugIn/clm/clmtrackr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+    </script>
+    <script src="/plugIn/qrcode.min.js"></script>
+   <script src="/plugIn/r/reqrcode.js"></script>
+
+    <script src="/js/camera.js"></script>
+    <script src="/js/faceEntry.js"></script>
+    <script src="/js/uploadImg.js"></script>
+    <script src="/js/tools.js"></script>
+    <script src="/js/detection.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/filterFace.js"></script>
+    <script>
+        //服务地址
+        var serviceUrl = "http://192.168.137.1:8099";
+
+        //摄像机相关方法
+        function sxj() {
+
+            //拍照
+            $("#Photograph").click(function () {
+                var base64 = userMedia.photograph(600, 600);
+                $("#uploadImg").attr('src', base64);
+            });
+             
+            //打开摄像机
+            $("#openVideoAuthentication").click(function () {
+                userMedia.play();
+            });
+
+            //关闭摄像机
+            $("#close").click(function () {
+                userMedia.closeUserMedia();
+                detection.stop();
+            });
+
+            //选择上传图片
+            $("#uploadImg").click(function () {
+                $("#upFileLoad").trigger('click');
+            });
+        }
+
+        function zp() {
+
+            //录入系统
+            $("#inputImg").click(function () {
+                var data = $("#uploadImg").attr('src');
+                var name = $("#name").val();
+                if (!name) {
+                    alert('请输入照片名字');
+                    return;
+                }
+                faceEntry(modifyBase64(data), name);
+            });
+
+            //识别照片
+            $("#photoFace").click(function () {
+                var data = $("#uploadImg").attr('src');
+                faceRecognitionForIamge(modifyBase64(data));
+            });
+ 
+            //视频认证
+            $("#VideoAuthentication").click(function () {
+                detection.startListen(function (rect) {
+                    tip("程序开始进行识别中......");
+                    //停止侦测
+                    detection.stopListen();
+                    var base64 = userMedia.photograph(400, 300);
+                    faceRecognitionForIamge(modifyBase64(base64), function () {});
+                });
+            });
+        }
+
+        function other() {
+            //测试连接
+            $("#test").click(function () {
+                testConnected();
+            });
+
+            //随机生成名字
+            $("#guidName").click(function () {
+                var t = guid();
+                $("#name").val(t);
+            });
+
+
+            //二维码生成
+            $("#qrcode").click(function () {
+                var text = $("#name").val();
+                if (!text) {
+                    alert('请在名字输入框中填写需要生成的内容');
+                    return;
+                }
+                _qrCode.enQrCode(text, function (base64) {
+                    $("#uploadImg").attr("src", base64);
+                });
+            });
+
+            //二维码识别
+            $("#deQrcode").click(function () {
+                var base64 = $("#uploadImg").attr("src");
+                // qrCode.distinguishQRCode(base64, function (res) {
+                //     alert(res);
+                // }); 
+                qrcode.decode(base64);
+                qrcode.callback = function (imgMsg) {
+                    alert("二维码解析：" + imgMsg)
+                }
+            });
+
+            initFilterFace();
+        }
+
+        //初始化
+        $(function () {
+
+            tip("程序连接中...");
+ 
+            //摄像设备初始化
+            userMedia.init($("#video"), $("#canvas"), 300, 400);
+            
+            //初始化二维码
+            _qrCode.init($("#quCodeParent"), 200, 200);
+
+            testConnected();
+
+            sxj();
+
+            zp();
+
+            other();
+
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="msg"></div>
+        <div class="left">
+            <div id="photo">
+                <div id="imgParent">
+                    <img id="uploadImg" src="/Image/default.png" width="200" height="200" onchange="test()" />
+                </div>
+                <span>原图</span>
+
+                <div>
+                    <img src="/Image/default.png" width="200" height="200" id="sb" />
+                </div>
+                <span>识别的图片</span>
+            </div>
+
+            <div class="form-group">
+                <label for="exampleInputEmail1">名字:</label>
+                <input type="text" class="form-control" id="name" placeholder="输入照片的名字">
+            </div>
+
+            <hr>
+ 
+            <div style="position: relative;">
+                <video id="video"></video>
+            </div> 
+
+            <form action="Upload" id="uploadForm" method="post" enctype="multipart/form-data" style="display: none">
+                <input id="upFileLoad" name="fileupload" type="file" value="" onchange="fileToBase64()" />
+            </form>
+            <div id="quCodeParent" style="display: none;"></div>
+            <canvas id="canvas" style="display:none;"></canvas>
+
+        </div>
+
+        <div class="right">
+            <select class="form-control" id="dropList"></select>
+            <!-- 照片认证 -->
+            <button id="inputImg" class="btn btn-success">录入系统</button>
+            <button id="photoFace" class="btn btn-success">照片识别</button>
+            <button id="test" class="btn btn-warning">测试连接</button>
+            <button id="guidName" class="btn btn-warning">随机名字</button>
+            <hr>
+
+            <!-- 视频认证 -->
+            <button id="openVideoAuthentication" class="btn btn-danger">打开摄像头</button>
+            <button id="close" class="btn btn-danger">关闭摄像头</button>
+            <button id="VideoAuthentication" class="btn btn-info">视频认证</button>
+            <button id="Photograph" class="btn btn-info">拍照照片</button>
+
+            <hr />
+            <button type="button" id="qrcode" class="btn btn-primary">生成二维码</button>
+            <button type="button" id="deQrcode" class="btn btn-primary">识别二维码</button>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

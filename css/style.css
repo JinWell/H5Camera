@@ -1,0 +1,43 @@
+#photo {
+    height: 300px;
+    width: 100%;
+}
+
+    #photo > div {
+        height: 300px;
+        width: 300px;
+        display: inline-block;
+        border: 1px solid #808080;
+    }
+
+        #photo > div > img {
+            margin: 35px 41px;
+        }
+
+
+    .left{
+        float: left;
+    }
+
+    .right{
+        float: right;
+    }
+
+    .right button{
+        display: block;
+        margin: 5px;
+    }
+
+ 
+
+    /* 人脸侦测css start */
+
+    /* 和人脸视频重叠 */
+    #detectionCancas{
+        position: absolute;
+        /* border: 1px solid red; */
+        left: 0;
+        top: 0;
+    }
+ 
+        /* 人脸侦测css end */
