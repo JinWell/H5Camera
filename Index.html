@@ -24,11 +24,20 @@
     <script src="/js/detection.js"></script>
     <script src="/js/qrcode.js"></script>
     <script src="/js/filterFace.js"></script>
+    <script src="/plugIn/r/reqrcode.js"></script>
     <script>
         //服务地址
         var serviceUrl = "http://192.168.137.1:8099";
 
         var userMdedia = new H5Camera;
+
+        function decode(base64) {
+            qrcode.decode(base64);
+            qrcode.callback = function (imgMsg) {
+                alert(imgMsg);
+                return imgMsg;
+            }
+        }
 
         //摄像机相关方法
         function sxj() {
@@ -122,10 +131,9 @@
 
             //二维码识别
             $("#deQrcode").click(function () {
-                var base64 = $("#uploadImg").attr("src");
-                qrCode.distinguishQRCode(base64, function (res) {
-                    alert(res);
-                });
+                debugger
+                var base64 = $("#uploadImg").attr("src"); 
+                decode(base64);
             });
 
             initFilterFace();
