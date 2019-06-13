@@ -22,19 +22,6 @@ detection = (function ($) {
     return [minX, minY, width, height];
   }
 
-
-  function getFace(positions) { 
-    const _minY = positions[33][1] -  positions[21][1] + 30;
-    const _minX = positions[20][0] - positions[0][0] + 10; 
-    const minX = positions[20][0] - 6 -_minX;
-    const maxX = positions[16][0] + 6; 
-    const minY = positions[33][1] - 6 - _minY;
-    const maxY = positions[7][1] + 6;
-    const width = maxX - minX;
-    const height = maxY - minY;
-    return [minX, minY, width+20, height];
-  }
-
   function clear() {
     var c = document.getElementById("detectionCancas");
     var ctx = c.getContext("2d");
@@ -69,7 +56,7 @@ detection = (function ($) {
       //ctrack.draw(overlay); 
 
       // 用红色画出人眼位置:
-      const eyesRect = getFace(currentPosition);// getEyes(currentPosition);
+      const eyesRect = getEyes(currentPosition);
       overlay_eye.strokeStyle = 'red';
       //暂时方案利用眼睛位置绘制轮廓
       overlay_eye.strokeRect(eyesRect[0], eyesRect[1], eyesRect[2], eyesRect[3]);

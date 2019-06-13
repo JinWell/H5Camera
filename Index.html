@@ -16,7 +16,6 @@
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
     </script>
     <script src="/plugIn/qrcode.min.js"></script>
-   <script src="/plugIn/r/reqrcode.js"></script>
 
     <script src="/js/camera.js"></script>
     <script src="/js/faceEntry.js"></script>
@@ -29,29 +28,38 @@
         //服务地址
         var serviceUrl = "http://192.168.137.1:8099";
 
+        var userMdedia = new H5Camera;
+
         //摄像机相关方法
         function sxj() {
 
             //拍照
             $("#Photograph").click(function () {
-                var base64 = userMedia.photograph(600, 600);
+                var base64 = userMdedia.photograph(600, 600);
                 $("#uploadImg").attr('src', base64);
             });
-             
+            
+
             //打开摄像机
             $("#openVideoAuthentication").click(function () {
-                userMedia.play();
+                userMdedia.play();
             });
 
             //关闭摄像机
             $("#close").click(function () {
-                userMedia.closeUserMedia();
+                userMdedia.closeUserMedia();
                 detection.stop();
             });
 
             //选择上传图片
             $("#uploadImg").click(function () {
                 $("#upFileLoad").trigger('click');
+            });
+
+            //录像
+            $("#record").click(function(){
+                userMdedia.start();
+
             });
         }
 
@@ -73,14 +81,15 @@
                 var data = $("#uploadImg").attr('src');
                 faceRecognitionForIamge(modifyBase64(data));
             });
- 
+
+
             //视频认证
             $("#VideoAuthentication").click(function () {
                 detection.startListen(function (rect) {
                     tip("程序开始进行识别中......");
                     //停止侦测
                     detection.stopListen();
-                    var base64 = userMedia.photograph(400, 300);
+                    var base64 = userMdedia.photograph(400, 300);
                     faceRecognitionForIamge(modifyBase64(base64), function () {});
                 });
             });
@@ -106,7 +115,7 @@
                     alert('请在名字输入框中填写需要生成的内容');
                     return;
                 }
-                _qrCode.enQrCode(text, function (base64) {
+                qrCode.qrCode(text, function (base64) {
                     $("#uploadImg").attr("src", base64);
                 });
             });
@@ -114,13 +123,9 @@
             //二维码识别
             $("#deQrcode").click(function () {
                 var base64 = $("#uploadImg").attr("src");
-                // qrCode.distinguishQRCode(base64, function (res) {
-                //     alert(res);
-                // }); 
-                qrcode.decode(base64);
-                qrcode.callback = function (imgMsg) {
-                    alert("二维码解析：" + imgMsg)
-                }
+                qrCode.distinguishQRCode(base64, function (res) {
+                    alert(res);
+                });
             });
 
             initFilterFace();
@@ -132,10 +137,10 @@
             tip("程序连接中...");
  
             //摄像设备初始化
-            userMedia.init($("#video"), $("#canvas"), 300, 400);
+            userMdedia.init($("#video"), $("#canvas"), 300, 400);
             
             //初始化二维码
-            _qrCode.init($("#quCodeParent"), 200, 200);
+            qrCode.init($("#quCodeParent"), 200, 200);
 
             testConnected();
 
@@ -199,6 +204,13 @@
             <button id="close" class="btn btn-danger">关闭摄像头</button>
             <button id="VideoAuthentication" class="btn btn-info">视频认证</button>
             <button id="Photograph" class="btn btn-info">拍照照片</button>
+
+            <hr/>
+
+            <button id="record" class='btn'>开始录制</button>
+            <button id="record" class='btn'>暂停录制</button>
+            <button id="record" class='btn'>继续录制</button>
+            <button id="stoprecord" class='btn'>停止录制</button>
 
             <hr />
             <button type="button" id="qrcode" class="btn btn-primary">生成二维码</button>

@@ -1,4 +1,4 @@
- _qrCode = (function ($) {
+ qrCode = (function ($) {
 
      var qrcode = null;
      let _h = 256;
@@ -12,7 +12,7 @@
              _$id = $id;
          }
 
-         this.enQrCode = function (content, f) {
+         this.qrCode = function (content, f) {
              qrcode = new QRCode($(_$id)[0], {
                  text: content,
                  width: _w,
@@ -31,11 +31,9 @@
              qrcode.makeCode(newContent);
          }
 
-         this.deQRCode = function (base64, f) {
+         this.distinguishQRCode = function (base64, f) {
             qrcode.decode(base64);
-            qrcode.callback = function (imgMsg) {
-                alert("二维码解析：" + imgMsg)
-            }
+            qrcode.callback = f;
          }
      }
      return new Global;
