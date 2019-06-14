@@ -15,30 +15,30 @@
 3.内置人脸检测模块  
 
 #使用方法 
-   var userMdedia = new H5Camera;  //初始化有何H5摄像机 -> 后续保持对userMdedia句柄的使用以便操作该摄像机
-   userMdedia.play();              //打开摄像机
-   userMdedia.stop();
+   var userMdedia = new H5Camera;  //初始化有何H5摄像机 -> 后续保持对userMdedia句柄的使用以便操作该摄像机  
+   userMdedia.play();              //打开摄像机  
+   userMdedia.stop(); 
 
 ### API
-1.new H5Camera  创建一个摄像设备，保持该句柄进行相关的操作
+1.new H5Camera  创建一个摄像设备，保持该句柄进行相关的操作  
 
 /**
  * API
  * 
- * 01.init               初始化                                         
- *                          参数列表:$video, $canvas, videoHeight, videWidth, isOpenDetection = false
+ * 01.init               初始化  
+ *                          参数列表:$video, $canvas, videoHeight, videWidth, isOpenDetection = false  
  *              
- * 02.addHandle          初始化完成之后要做的其他操作(在init之前加入)
+ * 02.addHandle          初始化完成之后要做的其他操作(在init之前加入)  
  
- * ---------------------------------------------------------        视频 
-   03.continue          继续拍摄
-   04.stop              停止拍摄
-   05.pause             暂停拍摄 
-   06.state             获取拍摄视频状态(停止，暂停等)
-   07.setDataType       设置视频数据格式 ["blob", "arrayBuffer"] 默认:blob  参数:index 
-   09.getvideoData      获取视频内容
-   10.start             开始录制视频
-   ---------------------------------------------------------        摄像机
+ * ---------------------------------------------------------        视频  
+   03.continue          继续拍摄  
+   04.stop              停止拍摄  
+   05.pause             暂停拍摄  
+   06.state             获取拍摄视频状态(停止，暂停等)  
+   07.setDataType       设置视频数据格式 ["blob", "arrayBuffer"] 默认:blob  参数:index  
+   09.getvideoData      获取视频内容  
+   10.start             开始录制视频  
+   ---------------------------------------------------------        摄像机  
    11.selectedDevice    切换摄像头
    12.closeUserMedia    关闭摄像头
    13.mediaCount        获取设备数量(只有前置和后置摄像头)
