@@ -14,11 +14,11 @@
 
 3.内置人脸检测模块  
 
-#使用方法 
+#使用方法  
    var userMdedia = new H5Camera;  //初始化有何H5摄像机 -> 后续保持对userMdedia句柄的使用以便操作该摄像机  
    userMdedia.play();              //打开摄像机  
-   userMdedia.stop(); 
-
+   userMdedia.stop();  
+   
 ### API
 1.new H5Camera  创建一个摄像设备，保持该句柄进行相关的操作  
 
