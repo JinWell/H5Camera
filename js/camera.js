@@ -60,7 +60,7 @@
 
 var H5Camera = (function ($) {
     let handleArr = [];
-
+    const baseType = { 'type': 'video/mp4' };
     /*播放器对象*/
     let videoNode = null;
     let buffers = [];
@@ -70,9 +70,17 @@ var H5Camera = (function ($) {
     let _$canvas = null;
     let videType = ["blob", "arrayBuffer"]; /*ByteBuffer*/
     let selectType = videType[0];
-    let photos = [];
+    let photos = []; 
     /*画布内容*/
     var canvasSrc = null; 
+    var types = ["video/webm",
+        "audio/webm",
+        "video/webm\;codecs=vp8",
+        "video/webm\;codecs=daala",
+        "video/webm\;codecs=h264",
+        "audio/webm\;codecs=opus",
+        "video/mpeg"];
+    var mime = null;
 
     function stringToBlob(str) {
         var blob = new Blob([str], {
@@ -83,7 +91,7 @@ var H5Camera = (function ($) {
 
     function typeArrayToBolb(typeArray, f) {
         var array = new Uint16Array(typeArray);
-        var blob = new Blob([array]);
+        var blob = new Blob([array], baseType);
         var reader = new FileReader();
         reader.readAsText(blob, 'utf-8');
         reader.onload = function (e) {
@@ -92,6 +100,7 @@ var H5Camera = (function ($) {
     };
 
     function blobToString(blob, f) {
+        blob = new Blob(blob, baseType)
         var reader = new FileReader();
         reader.readAsText(blob, 'utf-8');
         reader.onload = function (e) {
@@ -100,7 +109,7 @@ var H5Camera = (function ($) {
     };
 
     function arrayBufferToblob(arrayBuffer) {
-        return new Blob([arrayBuffer]);
+        return new Blob([arrayBuffer], baseType);
     };
 
     function blobToArrayBuffer(blob, f) {
@@ -109,10 +118,11 @@ var H5Camera = (function ($) {
         reader.onload = function (e) {
             //将 ArrayBufferView  转换成Blob  方法一
             var buf = new Uint8Array(reader.result);
-            reader.readAsText(new Blob([buf]), 'utf-8');
+            reader.readAsText(new Blob([buf], baseType), 'utf-8');
             reader.onload = function () {
                 f(reader.result);
             };
+
             //将 ArrayBufferView  转换成Blob  方法二
             //  var buf = new DataView(reader.result);
             //  console.info(buf); //DataView {}
@@ -124,11 +134,19 @@ var H5Camera = (function ($) {
     };
 
     function blobToUrl(blob) {
-        return URL.createObjectURL(blob);
+        return URL.createObjectURL(new Blob(blob, baseType));
     }
 
     function splitBlob(blob, start, end, contentType) {
         return blob.slice(start, end, contentType);
+    }
+
+    //**blob to dataURL**
+    function blobToDataURL(blob, callback) {
+        blob = new Blob(blob, baseType);
+        var a = new FileReader();
+        a.onload = function (e) { callback(e.target.result); }
+        a.readAsDataURL(blob);
     }
 
     /*设备*/
@@ -226,9 +244,14 @@ var H5Camera = (function ($) {
     function startRecord(media) {
         var options = null;
         if (typeof MediaRecorder.isTypeSupported == 'function') {
-            if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+             
+            if (MediaRecorder.isTypeSupported('video/mp4;codecs=hevc')) {
                 options = {
-                    mimeType: 'video/webm;codecs=h264'
+                    mimeType: 'video/mp4;codecs=hevc'
+                };
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                options = {
+                    mimeType: 'video/webm;codecs=vp9'
                 };
             } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) {
                 options = {
@@ -237,9 +260,10 @@ var H5Camera = (function ($) {
             } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
                 options = {
                     mimeType: 'video/webm;codecs=vp8'
-                };
+                }; 
             }
-            mediaRecorder = new MediaRecorder(media, options);
+            mediaRecorder = new MediaRecorder(media, options); 
+            mime = options.mimeType;
         } else {
             mediaRecorder = new MediaRecorder(media);
         }
@@ -332,6 +356,22 @@ var H5Camera = (function ($) {
         a.click();
     }
 
+     /*下载视频*/
+    function downVideo(Data, name) { 
+        var blob = new Blob(Data, { 'type': 'video/mp4' })
+        let a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = name+`.mp4`
+        a.click(); 
+    }
+
+    /*下载视频*/
+    function downVideoUrl(Data, name) { 
+        const downloadUrl = window.URL.createObjectURL(Data);
+        link.href = downloadUrl;
+        link.download = name + '.mp4';
+    }
+
     /*关闭摄像设备(默认3s后关闭)*/
     function closeUserMedia(timeout) {
         var video = $(_$video)[0];
@@ -356,6 +396,10 @@ var H5Camera = (function ($) {
 
         this.continue = resume;
 
+        this.mimeType = function () {
+            return mime;
+        }
+
         this.stop = stop;
 
         this.pause = pause;
@@ -379,12 +423,15 @@ var H5Camera = (function ($) {
 
         this.closeUserMedia = closeUserMedia;
 
+        this.downVideoUrl = downVideoUrl;
+        this.downVideo = downVideo;
+
         this.photograph = photograph;
 
         this.clearPhotos = function () {
             photos = [];
         };
-
+        this.blobToDataURL = blobToDataURL;
         this.getphotos = function () {
             return photos;
         };
@@ -410,6 +457,15 @@ var H5Camera = (function ($) {
                 handleArr.push(func);
         }
 
+        this.stringToBlob = stringToBlob;
+
+        this.typeArrayToBolb = typeArrayToBolb;
+
+        this.blobToString = blobToString;
+
+        this.blobToUrl = blobToUrl;
+
+        this.splitBlob = splitBlob;
         /**
          * 初始化
          *  $video video对象
