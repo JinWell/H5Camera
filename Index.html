@@ -47,10 +47,11 @@
                 var base64 = userMdedia.photograph(600, 600);
                 $("#uploadImg").attr('src', base64);
             });
-            
+
 
             //打开摄像机
             $("#openVideoAuthentication").click(function () {
+                debugger
                 userMdedia.open();
             });
 
@@ -66,7 +67,7 @@
             });
 
             //录像
-            $("#record").click(function(){
+            $("#record").click(function () {
                 userMdedia.start();
 
             });
@@ -132,7 +133,7 @@
             //二维码识别
             $("#deQrcode").click(function () {
                 debugger
-                var base64 = $("#uploadImg").attr("src"); 
+                var base64 = $("#uploadImg").attr("src");
                 decode(base64);
             });
 
@@ -143,10 +144,9 @@
         $(function () {
 
             tip("程序连接中...");
- 
             //摄像设备初始化
             userMdedia.init($("#video"), $("#canvas"), 300, 400);
-            
+
             //初始化二维码
             qrCode.init($("#quCodeParent"), 200, 200);
 
@@ -157,6 +157,43 @@
             zp();
 
             other();
+
+            $("#tOne").click(function () { 
+                debugger
+                var videoNode = $("#testoneVideo")[0];
+                const mediaDevices = navigator.mediaDevices.enumerateDevices();
+
+                mediaDevices.then(function (devices) {
+                    debugger
+                    /*过滤处摄像头设备*/
+                    const videDevices = devices.filter(item => item.kind === 'videoinput');
+                    var id = videDevices[0].deviceId;
+                    const videoConstraints = {
+                        deviceId: {
+                            exact: id
+                        },
+                        width: 500,
+                        height: 500
+                    };
+
+
+                    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.mediaDevices.getUserMedia;
+
+                    let userMedia = navigator.getUserMedia({
+                        audio: true,
+                        video: videoConstraints
+                    });
+
+                    userMedia.then(function (media) {
+                        debugger
+                        videoNode.srcObject = media;
+                        videoNode.play();
+                        mediaStream = media;  
+                    });
+
+                });
+
+            });
 
         });
     </script>
@@ -185,10 +222,12 @@
             </div>
 
             <hr>
- 
+
+            <video src="#" id="testoneVideo" width="500" height="500"></video>
+
             <div style="position: relative;">
-                <video id="video"></video>
-            </div> 
+                <video id="video" muted autoplay></video>
+            </div>
 
             <form action="Upload" id="uploadForm" method="post" enctype="multipart/form-data" style="display: none">
                 <input id="upFileLoad" name="fileupload" type="file" value="" onchange="fileToBase64()" />
@@ -213,7 +252,7 @@
             <button id="VideoAuthentication" class="btn btn-info">视频认证</button>
             <button id="Photograph" class="btn btn-info">拍照照片</button>
 
-            <hr/>
+            <hr />
 
             <button id="record" class='btn'>开始录制</button>
             <button id="record" class='btn'>暂停录制</button>
@@ -223,6 +262,9 @@
             <hr />
             <button type="button" id="qrcode" class="btn btn-primary">生成二维码</button>
             <button type="button" id="deQrcode" class="btn btn-primary">识别二维码</button>
+
+
+            <button type="button" id="tOne" class="btn btn-primary">本地测试</button>
         </div>
 
     </div>

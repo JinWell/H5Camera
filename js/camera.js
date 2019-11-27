@@ -71,6 +71,7 @@ var H5Camera = (function ($) {
     let videType = ["blob", "arrayBuffer"]; /*ByteBuffer*/
     let selectType = videType[0];
     let photos = []; 
+    var videoDeviceIds = [];
     /*画布内容*/
     var canvasSrc = null; 
     var types = ["video/webm",
@@ -149,11 +150,11 @@ var H5Camera = (function ($) {
         a.readAsDataURL(blob);
     }
 
-    /*设备*/
+    /*设备容器*/
     var selectVideConstraints = null;
-
+ 
     /*实例化对象*/
-    var changeUserMedia = (new ChangeUserMedia);
+    var changeUserMedia = null;
      
     var task = (function () {
 
@@ -183,7 +184,6 @@ var H5Camera = (function ($) {
 
     /*切换摄像头*/
     function ChangeUserMedia(width, height) { 
-        var videoDeviceIds = [];
         /*获取所有的媒体设备 await*/
         const mediaDevices = navigator.mediaDevices.enumerateDevices();
         mediaDevices.then(function (devices) {
@@ -191,7 +191,9 @@ var H5Camera = (function ($) {
             const videDevices = devices.filter(item => item.kind === 'videoinput');
             for (var i = 0; i < videDevices.length; i++) {
                 videoDeviceIds.push(videDevices[i].deviceId);
-            }
+            } 
+            changeUserMedia.getVideConstraintsDefault();
+
         });
 
         return (new function () {
@@ -419,7 +421,9 @@ var H5Camera = (function ($) {
         };
 
         /*默认前置摄像头*/
-        this.selectedDevice = changeUserMedia.getVideConstraintsDefault;
+        this.selectedDevice = function(){ 
+            return changeUserMedia.getVideConstraintsDefault;
+        };
 
         this.closeUserMedia = closeUserMedia;
 
@@ -480,10 +484,9 @@ var H5Camera = (function ($) {
             /*将原来的元素修改*/
             $($video).attr("height", videoHeight);
             $($video).attr("width", videWidth);
-            $($video).attr("playsinline", "true");
-            $($video).attr("muted", "true");
-            initDevice(videoHeight, videWidth);
-            changeUserMedia.getVideConstraintsDefault();
+            //$($video).attr("playsinline", "true");
+            //$($video).attr("muted", "true");
+            initDevice(videoHeight, videWidth);  
             if (isOpenDetection) {
                 self.addHandle(function () {
                     var d = $("<canvas id=\"detectionCancas\" width=\"" + videWidth + "\" height=\"" + videoHeight + "\"></canvas>")
